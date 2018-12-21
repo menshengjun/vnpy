@@ -17,18 +17,16 @@ from vnpy.trader.app.ctaStrategy.ctaTemplate import (CtaTemplate,
 class S002_KK_Strategy(CtaTemplate):
     """基于King Keltner通道的交易策略"""
     className = 'S002_KK_Strategy'
-    author = u'用Python的交易员'
+    author = u'zpf'
 
     # 策略参数
-    kkLength = 11           # 计算通道中值的窗口数
-    kkDev = 1.6             # 计算通道宽度的偏差
-    trailingPrcnt = 0.8     # 移动止损
-    initDays = 10           # 初始化数据所用的天数
-    fixedSize = 1           # 每次交易的数量
+    kkLength = 50           # 计算通道中值的窗口数
+    kkDev = 2               # 计算通道宽度的偏差
+    initDays = 30           # 初始化数据所用的天数
+    fixedSize = 0           # 每次交易的数量
 
     # 策略变量
-    kkUp = 0                            # KK通道上轨
-    kkDown = 0                          # KK通道下轨
+
     intraTradeHigh = 0                  # 持仓期内的最高点
     intraTradeLow = 0                   # 持仓期内的最低点
 
@@ -42,7 +40,8 @@ class S002_KK_Strategy(CtaTemplate):
                  'author',
                  'vtSymbol',
                  'kkLength',
-                 'kkDev']    
+                 'kkDev',
+                 'fixedSize']
 
     # 变量列表，保存了变量的名称
     varList = ['inited',
@@ -61,13 +60,17 @@ class S002_KK_Strategy(CtaTemplate):
         """Constructor"""
         super(S002_KK_Strategy, self).__init__(ctaEngine, setting)
         
-        self.bg = BarGenerator(self.onBar, 5, self.onFiveBar)     # 创建K线合成器对象
+        self.bg = BarGenerator(self.onBar, 60, self.on60Bar)     # 创建K线合成器对象
         self.am = ArrayManager()
         
         self.buyOrderIDList = []
         self.shortOrderIDList = []
         self.orderList = []
-        
+
+        self.kkUp = 0                            # KK通道上轨
+        self.kkDown = 0                          # KK通道下轨
+        self.mid = 0                             # KK通道中轨
+
     #----------------------------------------------------------------------
     def onInit(self):
         """初始化策略（必须由用户继承实现）"""
@@ -103,12 +106,10 @@ class S002_KK_Strategy(CtaTemplate):
         self.bg.updateBar(bar)
     
     #----------------------------------------------------------------------
-    def onFiveBar(self, bar):
-        """收到5分钟K线"""
-        # 撤销之前发出的尚未成交的委托（包括限价单和停止单）
-        for orderID in self.orderList:
-            self.cancelOrder(orderID)
-        self.orderList = []
+    def on60Bar(self, bar):
+        """收到60分钟K线"""
+        # 撤单撤掉之前发的所有单
+        self.cancelAll()
     
         # 保存K线数据
         am = self.am
@@ -117,33 +118,24 @@ class S002_KK_Strategy(CtaTemplate):
             return
         
         # 计算指标数值
-        self.kkUp, self.kkDown = am.keltner(self.kkLength, self.kkDev)
+        self.kkUp, self.kkDown ,self.mid= am.keltner(self.kkLength, self.kkDev, array=True)
         
         # 判断是否要进行交易
     
-        # 当前无仓位，发送OCO开仓委托
+        # 当前无仓位，发送多仓或者空仓
         if self.pos == 0:
-            self.intraTradeHigh = bar.high
-            self.intraTradeLow = bar.low            
-            self.sendOcoOrder(self.kkUp, self.kkDown, self.fixedSize)
-    
+            if self.mid[-1] > self.mid[-2]: # 当均线向上的时候
+                self.buy(self.kkUp[-1], self.fixedSize, True)
+            if self.mid[-1] < self.mid[-2]: # 当均线向下的时候
+                self.short(self.kkDown[-1], self.fixedSize, True)
+
         # 持有多头仓位
         elif self.pos > 0:
-            self.intraTradeHigh = max(self.intraTradeHigh, bar.high)
-            self.intraTradeLow = bar.low
-            
-            l = self.sell(self.intraTradeHigh*(1-self.trailingPrcnt/100), 
-                          abs(self.pos), True)
-            self.orderList.extend(l)
+            self.sell(self.mid[-1], abs(self.pos), True)
     
         # 持有空头仓位
         elif self.pos < 0:
-            self.intraTradeHigh = bar.high
-            self.intraTradeLow = min(self.intraTradeLow, bar.low)
-            
-            l = self.cover(self.intraTradeLow*(1+self.trailingPrcnt/100), 
-                           abs(self.pos), True)
-            self.orderList.extend(l)
+            self.cover(self.mid[-1], abs(self.pos), True)
     
         # 同步数据到数据库
         self.saveSyncData()    
@@ -158,41 +150,10 @@ class S002_KK_Strategy(CtaTemplate):
 
     #----------------------------------------------------------------------
     def onTrade(self, trade):
-        if self.pos != 0:
-            # 多头开仓成交后，撤消空头委托
-            if self.pos > 0:
-                for shortOrderID in self.shortOrderIDList:
-                    self.cancelOrder(shortOrderID)
-            # 反之同样
-            elif self.pos < 0:
-                for buyOrderID in self.buyOrderIDList:
-                    self.cancelOrder(buyOrderID)
-            
-            # 移除委托号
-            for orderID in (self.buyOrderIDList + self.shortOrderIDList):
-                if orderID in self.orderList:
-                    self.orderList.remove(orderID)
+        print u"%s %s %s %s %s %s " % (trade.symbol,trade.direction,trade.offset,trade.price,trade.volume, trade.tradeTime)
                 
         # 发出状态更新事件
         self.putEvent()
-        
-    #----------------------------------------------------------------------
-    def sendOcoOrder(self, buyPrice, shortPrice, volume):
-        """
-        发送OCO委托
-        
-        OCO(One Cancel Other)委托：
-        1. 主要用于实现区间突破入场
-        2. 包含两个方向相反的停止单
-        3. 一个方向的停止单成交后会立即撤消另一个方向的
-        """
-        # 发送双边的停止单委托，并记录委托号
-        self.buyOrderIDList = self.buy(buyPrice, volume, True)
-        self.shortOrderIDList = self.short(shortPrice, volume, True)
-        
-        # 将委托号记录到列表中
-        self.orderList.extend(self.buyOrderIDList)
-        self.orderList.extend(self.shortOrderIDList)
 
     #----------------------------------------------------------------------
     def onStopOrder(self, so):
