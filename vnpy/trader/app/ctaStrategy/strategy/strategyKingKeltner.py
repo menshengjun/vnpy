@@ -118,7 +118,10 @@ class KkStrategy(CtaTemplate):
         am.updateBar(bar)
         if not am.inited:
             return
-        
+
+        # 打印行情
+        print u"bar %s,   %d, %d, %d, %d" % (bar.datetime, bar.open,bar.high,bar.low,bar.close)
+
         # 计算指标数值
         self.kkUp, self.kkDown = am.keltner(self.kkLength, self.kkDev)
         
