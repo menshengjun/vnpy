@@ -1,7 +1,7 @@
 [
     {
-        "name": "king keltner",
-        "className": "KkStrategy",
+        "name": "S002_rb",
+        "className": "S002_KK_Strategy",
         "vtSymbol": "rb1905"
     }
 ]
