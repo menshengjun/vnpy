@@ -112,7 +112,7 @@ class S001_BA_Strategy(CtaTemplate):
             return
 
         # 计算指标数值
-        self.baUp, self.baDown, self.baMid = am.donchian(self.baLength, True)
+        self.baUp, self.baDown, self.baMid = am.donchianMid(self.baLength, True)
 
         # 打印行情,load的时候只打印屏幕，实盘打印记录
         if self.trading:
