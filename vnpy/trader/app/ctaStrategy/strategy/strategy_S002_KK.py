@@ -117,12 +117,15 @@ class S002_KK_Strategy(CtaTemplate):
         if not am.inited:
             return
 
-        # 打印行情
-        print u"bar %s  %s,   %d, %d, %d, %d   pos = %d" % (bar.symbol, bar.datetime, bar.open,bar.high,bar.low,bar.close, self.pos)
-
         # 计算指标数值
         self.kkUp, self.kkDown, self.kkMid = am.keltner(self.kkLength, self.kkDev, True)
-        
+
+        # 打印行情,load的时候只打印屏幕，实盘打印记录
+        if self.trading:
+            self.writeCtaLog( u"bar %s  %s,   %d, %d, %d, %d    上 %d 下 %d  中 %d   pos = %d" % (bar.symbol, bar.datetime, bar.open,bar.high,bar.low,bar.close, self.kkUp[-1],self.kkDown[-1],self.kkMid[-1],self.pos))
+        else:
+            print ( u"bar %s  %s,   %d, %d, %d, %d    上 %d 下 %d  中 %d   pos = %d" % (bar.symbol, bar.datetime, bar.open,bar.high,bar.low,bar.close, self.kkUp[-1],self.kkDown[-1],self.kkMid[-1],self.pos))
+
         # 判断是否要进行交易
     
         # 当前无仓位，发送开仓委托
