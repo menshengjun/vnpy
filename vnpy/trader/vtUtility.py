@@ -288,9 +288,10 @@ class ArrayManager(object):
     #----------------------------------------------------------------------
     def donchian(self, n, array=False):
         """唐奇安通道"""
+        mid = self.sma(n, array)
         up = talib.MAX(self.high, n)
         down = talib.MIN(self.low, n)
         
         if array:
-            return up, down
-        return up[-1], down[-1]
+            return up, down,  mid
+        return up[-1], down[-1] , mid[-1]
