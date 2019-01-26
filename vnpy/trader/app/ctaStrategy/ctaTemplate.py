@@ -196,6 +196,52 @@ class CtaTemplate(object):
     def getPriceTick(self):
         """查询最小价格变动"""
         return self.ctaEngine.getPriceTick(self)
+
+    #----------------------------------------------------------------------
+    def filterTick(self, tick):
+        """把不在交易时间的tick过滤"""
+        if tick.symbol[0:1] == "T":
+            if (int(tick.time[0:2]) < 9 ):
+                return True
+            if (int(tick.time[0:2]) == 9 and int(tick.time[3:5]) <= 14):
+                return True
+            if (int(tick.time[0:2]) == 15 and int(tick.time[3:5]) > 15):
+                return True
+            if (int(tick.time[0:2]) > 15 ):
+                return True
+        else:
+            if (int(tick.time[0:2]) < 9 ):
+                return True
+            if (int(tick.time[0:2]) == 15 and int(tick.time[3:5]) > 0):
+                return True
+            if (int(tick.time[0:2]) > 15 ):
+                return True
+        return False
+
+    #----------------------------------------------------------------------
+    def filterBar(self,bar):
+        """把不在交易时间的bar过滤"""
+        if bar.symbol[0:1] == "T":
+            if bar.datetime.hour < 9:
+                return True
+            if (bar.datetime.hour == 9 and bar.datetime.minute <= 14):
+                return True
+            if (bar.datetime.hour  == 15 and bar.datetime.minute > 15):
+                return True
+            if (bar.datetime.hour   > 15 ):
+                return True
+        else:
+            if bar.datetime.hour < 9 :
+                return True
+            if (bar.datetime.hour == 15 and bar.datetime.minute > 0):
+                return True
+            if (bar.datetime.hour  > 15 ):
+                return True
+        return False
+
+
+
+
         
 
 ########################################################################

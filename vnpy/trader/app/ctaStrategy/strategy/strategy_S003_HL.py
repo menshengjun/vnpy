@@ -93,7 +93,7 @@ class S003_HL_Strategy(CtaTemplate):
     def onTick(self, tick):
         """收到行情TICK推送（必须由用户继承实现）"""
         # 过滤无效tick
-        if int(tick.time[0:2]) <= 8 or int(tick.time[0:2]) >= 15:
+        if self.filterTick(tick):
             return
 
         self.bg.updateTick(tick)
@@ -102,7 +102,7 @@ class S003_HL_Strategy(CtaTemplate):
     def onBar(self, bar):
         """收到Bar推送（必须由用户继承实现）"""
         # 过滤无效K线
-        if bar.datetime.hour <= 8  or bar.datetime.hour >= 15 :
+        if self.filterBar(bar):
             return
 
         # print u"1 min bar %s  %s" % (bar.symbol, bar.datetime)
