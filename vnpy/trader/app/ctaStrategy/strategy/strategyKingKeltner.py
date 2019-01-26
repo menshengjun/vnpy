@@ -75,7 +75,7 @@ class KkStrategy(CtaTemplate):
     def onInit(self):
         """初始化策略（必须由用户继承实现）"""
         self.writeCtaLog(u'%s策略初始化' %self.name)
-        
+
         # 载入历史数据，并采用回放计算的方式初始化策略数值
         initData = self.loadBar(self.initDays)
         for bar in initData:
@@ -86,7 +86,7 @@ class KkStrategy(CtaTemplate):
     #----------------------------------------------------------------------
     def onStart(self):
         """启动策略（必须由用户继承实现）"""
-        self.writeCtaLog(u'%s策略启动' %self.name)
+        self.writeCtaLog(u'%s策略启动, 目前仓位 %d' % (self.name, self.pos))
         self.putEvent()
 
     #----------------------------------------------------------------------
@@ -120,7 +120,7 @@ class KkStrategy(CtaTemplate):
             return
 
         # 打印行情
-        print u"bar %s,   %d, %d, %d, %d" % (bar.datetime, bar.open,bar.high,bar.low,bar.close)
+        print u"bar %s,   %d, %d, %d, %d " % (bar.datetime, bar.open,bar.high,bar.low,bar.close)
 
         # 计算指标数值
         self.kkUp, self.kkDown = am.keltner(self.kkLength, self.kkDev)

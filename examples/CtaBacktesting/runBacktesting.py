@@ -38,7 +38,7 @@ if __name__ == '__main__':
     engine.setPriceTick(1)    # 股指最小价格变动
 
     # 设置使用的历史数据库
-    engine.setDatabase(MINUTE_DB_NAME, 'rb0000')
+    engine.setDatabase(MINUTE_DB_NAME, 'rb1905')
 
     
     # 在引擎中创建策略对象
