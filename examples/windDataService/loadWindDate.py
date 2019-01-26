@@ -11,7 +11,7 @@ from multiprocessing.pool import ThreadPool
 import re
 import pymongo
 
-from vnpy.data.datayes import DatayesApi
+# from vnpy.data.datayes import DatayesApi
 from vnpy.trader.vtGlobal import globalSetting
 from vnpy.trader.vtConstant import *
 from vnpy.trader.vtObject import VtBarData
@@ -98,13 +98,19 @@ def loadWindCsv(db_bar, dbName, symbol):
 
 
 def runChildProcess():
-    symbolList = ["AP905.CZC","CF905.CZC","MA905.CZC","SF905.CZC","SM905.CZC","SR905.CZC","TA905.CZC","ZC905.CZC",
-                  "c1905.DCE","i1905.DCE","j1905.DCE","pp1905.DCE",
+    # symbolList = ["AP905.CZC","CF905.CZC","MA905.CZC","SF905.CZC","SM905.CZC","SR905.CZC","TA905.CZC","ZC905.CZC",
+    #               "c1905.DCE","i1905.DCE","j1905.DCE","pp1905.DCE",
+    #               "hc1905.SHF","rb1905.SHF","ru1901.SHF",
+    #               "T1903.CFE"]
+    symbolList = [
+                  #"AP905.CZC","CF905.CZC","MA905.CZC","SF905.CZC","SM905.CZC","SR905.CZC","TA905.CZC","ZC905.CZC",
+                  #"c1905.DCE","i1905.DCE","j1905.DCE","pp1905.DCE",
                   "hc1905.SHF","rb1905.SHF","ru1901.SHF",
-                  "T1903.CFE"]
+                  #"T1903.CFE"
+                 ]
     for i in symbolList:
         a = re.split('[. ]+', i)
-        db_bar = getWindData(i,20)
+        db_bar = getWindData(i,200)
         loadWindCsv(db_bar, 'VnTrader_1Min_Db', a[0])
 
 
