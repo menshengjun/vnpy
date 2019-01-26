@@ -276,6 +276,12 @@ class BacktestingEngine(object):
         for d in self.dbCursor:
             data = dataClass()
             data.__dict__ = d
+
+            # 在这里也需要过滤一下,避免撮合到夜盘
+            # 过滤无效K线
+            if data.datetime.hour <= 8  or data.datetime.hour >= 15 :
+                continue
+
             func(data)     
             
         self.output(u'数据回放结束')
@@ -579,7 +585,8 @@ class BacktestingEngine(object):
     #----------------------------------------------------------------------
     def writeCtaLog(self, content):
         """记录日志"""
-        log = str(self.dt) + ' ' + content 
+        log = str(self.dt) + ' ' + content
+        print(log)
         self.logList.append(log)
     
     #----------------------------------------------------------------------

@@ -55,7 +55,7 @@ class S002_KK_Strategy(CtaTemplate):
         """Constructor"""
         super(S002_KK_Strategy, self).__init__(ctaEngine, setting)
         
-        self.bg = BarGenerator(self.onBar, 30, self.on_60_Bar)     # 创建K线合成器对象
+        self.bg = BarGenerator(self.onBar, 60, self.on_60_Bar)     # 创建K线合成器对象
         self.am = ArrayManager()
         
         self.buyOrderIDList = []
@@ -88,12 +88,21 @@ class S002_KK_Strategy(CtaTemplate):
 
     #----------------------------------------------------------------------
     def onTick(self, tick):
-        """收到行情TICK推送（必须由用户继承实现）""" 
+        """收到行情TICK推送（必须由用户继承实现）"""
+        # 过滤无效tick
+        if int(tick.time[0:2]) <= 8 or int(tick.time[0:2]) >= 15:
+            return
+
         self.bg.updateTick(tick)
 
     #----------------------------------------------------------------------
     def onBar(self, bar):
         """收到Bar推送（必须由用户继承实现）"""
+        # 过滤无效K线
+        if bar.datetime.hour <= 8  or bar.datetime.hour >= 15 :
+            return
+
+        # print u"1 min bar %s  %s" % (bar.symbol, bar.datetime)
         self.bg.updateBar(bar)
     
     #----------------------------------------------------------------------
@@ -145,6 +154,7 @@ class S002_KK_Strategy(CtaTemplate):
     #----------------------------------------------------------------------
     def onTrade(self, trade):
         """"""
+        self.writeCtaLog(u'%s %s %s %d %d %s' % (trade.symbol, trade.direction, trade.offset ,trade.price, trade.volume , trade.tradeTime))
         # 发出状态更新事件
         self.putEvent()
 

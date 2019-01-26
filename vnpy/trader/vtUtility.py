@@ -26,6 +26,7 @@ class BarGenerator(object):
         self.onXminBar = onXminBar  # X分钟K线的回调函数
         
         self.lastTick = None        # 上一TICK缓存对象
+        self.lastBar = None         # 上一个bar缓存对象
         
     #----------------------------------------------------------------------
     def updateTick(self, tick):
@@ -103,7 +104,8 @@ class BarGenerator(object):
         self.xminBar.volume += int(bar.volume)                
             
         # X分钟已经走完
-        if not (bar.datetime.minute + 1) % self.xmin:   # 可以用X整除
+        if (not (bar.datetime.minute + 1) % self.xmin ) \
+                or (self.xmin == 60 and bar.datetime.hour == 11 and bar.datetime.minute == 29):   # 可以用X整除
             # 生成上一X分钟K线的时间戳
             self.xminBar.datetime = self.xminBar.datetime.replace(second=0, microsecond=0)  # 将秒和微秒设为0
             self.xminBar.date = self.xminBar.datetime.strftime('%Y%m%d')
@@ -114,6 +116,9 @@ class BarGenerator(object):
             
             # 清空老K线缓存对象
             self.xminBar = None
+
+        # 缓存bar
+        self.lastBar = bar
 
     #----------------------------------------------------------------------
     def generate(self):
