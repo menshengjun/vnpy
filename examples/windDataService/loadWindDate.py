@@ -103,10 +103,10 @@ def runChildProcess():
     #               "hc1905.SHF","rb1905.SHF","ru1901.SHF",
     #               "T1903.CFE"]
     symbolList = [
-                  #"AP905.CZC","CF905.CZC","MA905.CZC","SF905.CZC","SM905.CZC","SR905.CZC","TA905.CZC","ZC905.CZC",
-                  #"c1905.DCE","i1905.DCE","j1905.DCE","pp1905.DCE",
-                  "hc1905.SHF","rb1905.SHF","ru1905.SHF",
-                  #"T1903.CFE"
+                  "AP905.CZC","CF905.CZC","MA905.CZC","SF905.CZC","SM905.CZC","SR905.CZC","TA905.CZC","ZC905.CZC",
+                  "c1905.DCE","i1905.DCE","j1905.DCE","pp1905.DCE",
+                  # "hc1905.SHF","rb1905.SHF","ru1905.SHF",
+                  "T1903.CFE"
                  ]
     for i in symbolList:
         a = re.split('[. ]+', i)

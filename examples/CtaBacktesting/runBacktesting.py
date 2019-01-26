@@ -14,6 +14,7 @@ if __name__ == '__main__':
     from vnpy.trader.app.ctaStrategy.strategy.strategyKingKeltner import KkStrategy
     from vnpy.trader.app.ctaStrategy.strategy.strategy_S001_BA import S001_BA_Strategy
     from vnpy.trader.app.ctaStrategy.strategy.strategy_S002_KK import S002_KK_Strategy
+    from vnpy.trader.app.ctaStrategy.strategy.strategy_S003_HL import S003_HL_Strategy
     from vnpy.trader.app.ctaStrategy.strategy.strategyTurtleTrading import TurtleTradingStrategy
 
     
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     
     # 在引擎中创建策略对象
     d = {}
-    engine.initStrategy(TurtleTradingStrategy, d)
+    engine.initStrategy(S003_HL_Strategy, d)
     
     # 开始跑回测
     engine.runBacktesting()
