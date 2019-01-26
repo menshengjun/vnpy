@@ -65,3 +65,4 @@ dist
 *.egg
 *.egg-info
 
+examples/CtaBacktesting/rb0000_1min_tb.csv

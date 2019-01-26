@@ -23,7 +23,7 @@ if __name__ == '__main__':
     engine.setBacktestingMode(engine.BAR_MODE)
 
     # 设置回测用的数据起始日期
-    engine.setStartDate('20160101')
+    engine.setStartDate('20100101')
     
     # # 设置产品相关参数
     # engine.setSlippage(0.2)     # 股指1跳
@@ -41,12 +41,13 @@ if __name__ == '__main__':
     engine.setPriceTick(1)    # 股指最小价格变动
 
     # 设置使用的历史数据库
-    engine.setDatabase(MINUTE_DB_NAME, 'rb1905')
+    # engine.setDatabase(MINUTE_DB_NAME, 'rb1905')
+    engine.setDatabase(MINUTE_DB_NAME, 'rb0000')
 
     
     # 在引擎中创建策略对象
     d = {}
-    engine.initStrategy(S001_BA_Strategy, d)
+    engine.initStrategy(S002_KK_Strategy, d)
     
     # 开始跑回测
     engine.runBacktesting()
